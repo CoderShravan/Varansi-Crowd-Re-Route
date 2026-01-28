@@ -12,7 +12,8 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     define: {
       // This allows the code to use process.env.API_KEY
-      'process.env.API_KEY': JSON.stringify(env.API_KEY)
+      // Fallback to process.env.API_KEY allows picking up system env vars (e.g. from cloud shell)
+      'process.env.API_KEY': JSON.stringify(env.API_KEY || process.env.API_KEY)
     }
   }
 })

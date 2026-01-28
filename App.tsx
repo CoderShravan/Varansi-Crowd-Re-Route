@@ -83,11 +83,7 @@ const App: React.FC = () => {
             </div>
             
             <div className="hidden md:flex items-center gap-3">
-               {!process.env.API_KEY && (
-                  <div className="bg-red-50 text-red-600 px-3 py-1 rounded-full text-xs font-bold border border-red-100">
-                      API Key Missing
-                  </div>
-               )}
+               {/* API Key warning removed to avoid false positives */}
             </div>
         </header>
 
