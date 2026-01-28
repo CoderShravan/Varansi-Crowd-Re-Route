@@ -6,7 +6,7 @@ import HindiAlerts from './components/HindiAlerts';
 import Analytics from './components/Analytics';
 import DataTable from './components/DataTable';
 import SafeRoutes from './components/SafeRoutes';
-import SimulationPanel from './components/SimulationPanel';
+import VisionPanel from './components/SimulationPanel'; // Importing Vision from the same file path as instructed
 import { generateSyntheticData } from './utils/dataGenerator';
 import { LocationData, FilterState } from './types';
 
@@ -43,8 +43,8 @@ const App: React.FC = () => {
         return <RiskMap data={filteredData} />;
       case 'safe-routes':
         return <SafeRoutes data={filteredData} />;
-      case 'simulation':
-        return <SimulationPanel />;
+      case 'vision':
+        return <VisionPanel onStartDemo={() => setActiveTab('map')} />;
       case 'alerts':
         return <HindiAlerts data={filteredData} />;
       case 'analytics':
@@ -72,7 +72,7 @@ const App: React.FC = () => {
                 <h2 className="text-xl md:text-3xl font-bold text-gray-800 tracking-tight">
                     {activeTab === 'map' && 'Live Risk Heatmap'}
                     {activeTab === 'safe-routes' && 'Safe Routes & AI Guide'}
-                    {activeTab === 'simulation' && 'AI Crowd Simulation'}
+                    {activeTab === 'vision' && 'Our Vision & Solution'}
                     {activeTab === 'alerts' && 'Hindi Public Alerts'}
                     {activeTab === 'analytics' && 'Operational Analytics'}
                     {activeTab === 'data' && 'Sensor Network Data'}

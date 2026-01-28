@@ -11,7 +11,7 @@ import {
   FunnelIcon,
   Bars3Icon,
   XMarkIcon,
-  CpuChipIcon
+  LightBulbIcon
 } from '@heroicons/react/24/outline';
 
 interface SidebarProps {
@@ -29,7 +29,7 @@ const Sidebar: React.FC<SidebarProps> = ({ filters, setFilters, data, activeTab,
   const tabs = [
     { id: 'map', label: 'Live Risk Map', icon: MapIcon },
     { id: 'safe-routes', label: 'Safe Routes & Chat', icon: ShieldCheckIcon },
-    { id: 'simulation', label: 'AI Simulation', icon: CpuChipIcon },
+    { id: 'vision', label: 'Project Vision', icon: LightBulbIcon },
     { id: 'alerts', label: 'Hindi Alerts', icon: LanguageIcon },
     { id: 'analytics', label: 'Analytics', icon: ChartBarIcon },
     { id: 'data', label: 'Sensor Data', icon: TableCellsIcon },
