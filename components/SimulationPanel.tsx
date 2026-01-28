@@ -31,7 +31,7 @@ const VisionPanel: React.FC<VisionPanelProps> = ({ onStartDemo }) => {
                         <div className="flex-1 space-y-8 text-center md:text-left">
                             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-orange-300 text-sm font-bold tracking-wide shadow-lg">
                                 <SparklesIcon className="w-4 h-4" />
-                                <span>SMART INDIA HACKATHON 2024</span>
+                                <span>AI INDIA HACKATHON 26</span>
                             </div>
                             
                             <h1 className="text-5xl md:text-7xl font-black text-white leading-[1.1] tracking-tight">
