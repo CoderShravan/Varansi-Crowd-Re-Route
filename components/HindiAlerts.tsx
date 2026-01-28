@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { LocationData, Alert } from '../types';
 import { generateHindiAlert, generateSpeechFromText, playAudioContent } from '../services/geminiService';
-import { SparklesIcon, SpeakerWaveIcon, MapPinIcon } from '@heroicons/react/24/solid';
+import { SparklesIcon, SpeakerWaveIcon, MapPinIcon, MegaphoneIcon } from '@heroicons/react/24/solid';
 
 interface HindiAlertsProps {
   data: LocationData[];
@@ -15,6 +16,7 @@ interface Coords {
 const HindiAlerts: React.FC<HindiAlertsProps> = ({ data }) => {
   const [generatedAlerts, setGeneratedAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState<string | null>(null);
+  const [broadcastLoading, setBroadcastLoading] = useState(false);
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<Coords | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
@@ -62,6 +64,31 @@ const HindiAlerts: React.FC<HindiAlertsProps> = ({ data }) => {
 
     setGeneratedAlerts(prev => [newAlert, ...prev]);
     setLoading(null);
+  };
+
+  const handleEmergencyBroadcast = async () => {
+    if (highRiskLocations.length === 0) return;
+    setBroadcastLoading(true);
+
+    try {
+        const promises = highRiskLocations.map(async (loc) => {
+            const text = await generateHindiAlert(loc, true);
+            return {
+                id: Date.now().toString() + Math.random().toString(),
+                locationName: loc.name,
+                message: text,
+                severity: 'critical' as const,
+                timestamp: new Date().toLocaleTimeString()
+            };
+        });
+
+        const newAlerts = await Promise.all(promises);
+        setGeneratedAlerts(prev => [...newAlerts, ...prev]);
+    } catch (e) {
+        console.error("Broadcast failed", e);
+    } finally {
+        setBroadcastLoading(false);
+    }
   };
 
   const handlePlayAudio = async (alertId: string, text: string) => {
@@ -129,14 +156,32 @@ const HindiAlerts: React.FC<HindiAlertsProps> = ({ data }) => {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
       {/* List of Locations needing alerts */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col h-full overflow-hidden">
-        <h3 className="font-bold text-lg text-gray-800 mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-2"><span className="text-orange-500">⚠️</span> Active Alerts Needed</div>
-          {userLocation && (
-              <span className="text-xs font-normal text-green-600 flex items-center gap-1 bg-green-50 px-2 py-1 rounded-full animate-pulse">
-                  <MapPinIcon className="w-3 h-3" /> Location Tracking Active
-              </span>
-          )}
-        </h3>
+        <div className="mb-4">
+             <h3 className="font-bold text-lg text-gray-800 mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-2"><span className="text-orange-500">⚠️</span> Active Alerts Needed</div>
+                {userLocation && (
+                    <span className="text-xs font-normal text-green-600 flex items-center gap-1 bg-green-50 px-2 py-1 rounded-full animate-pulse">
+                        <MapPinIcon className="w-3 h-3" /> Location Tracking Active
+                    </span>
+                )}
+            </h3>
+            
+            {/* Emergency Broadcast Button */}
+            {highRiskLocations.length > 0 && (
+                 <button
+                     onClick={handleEmergencyBroadcast}
+                     disabled={broadcastLoading}
+                     className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-bold shadow-lg shadow-red-500/20 flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-70 disabled:active:scale-100 group mb-2"
+                 >
+                     {broadcastLoading ? (
+                         <span className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
+                     ) : (
+                         <MegaphoneIcon className="w-5 h-5" />
+                     )}
+                     {broadcastLoading ? 'INITIALIZING BROADCAST NETWORK...' : '🚨 EMERGENCY BROADCAST TO ALL ZONES'}
+                 </button>
+             )}
+        </div>
         
         <div className="overflow-y-auto flex-1 space-y-3">
           {highRiskLocations.length === 0 ? (
@@ -188,7 +233,7 @@ const HindiAlerts: React.FC<HindiAlertsProps> = ({ data }) => {
                     <div key={alert.id} className={`p-4 rounded-lg backdrop-blur-md bg-white/10 border ${alert.severity === 'critical' ? 'border-red-500/50' : 'border-indigo-400/30'} ${autoPlayedIds.has(alert.id) ? 'ring-2 ring-green-400 ring-opacity-50' : ''}`}>
                         <div className="flex justify-between items-start mb-2">
                             <span className="text-xs font-mono opacity-70">{alert.timestamp}</span>
-                            <span className={`text-xs px-2 py-0.5 rounded-full ${alert.severity === 'critical' ? 'bg-red-500 text-white' : 'bg-yellow-500 text-black'}`}>
+                            <span className={`text-xs px-2 py-0.5 rounded-full ${alert.severity === 'critical' ? 'bg-red-500 text-white animate-pulse' : 'bg-yellow-500 text-black'}`}>
                                 {alert.severity.toUpperCase()}
                             </span>
                         </div>

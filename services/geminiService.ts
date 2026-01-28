@@ -11,13 +11,13 @@ if (process.env.API_KEY) {
 
 // --- EXISTING FUNCTIONS ---
 
-export const generateHindiAlert = async (location: LocationData): Promise<string> => {
+export const generateHindiAlert = async (location: LocationData, isEmergency: boolean = false): Promise<string> => {
   if (!ai) return "API Key not configured. Unable to generate alert.";
 
   try {
     const prompt = `
       You are an AI assistant for the Varanasi Crowd Management System.
-      Generate a short, urgent, and clear safety alert in HINDI for the following situation:
+      Generate a ${isEmergency ? "CRITICAL EMERGENCY BROADCAST" : "short, urgent, and clear safety alert"} in HINDI for the following situation:
       
       Location: ${location.name}
       Current Crowd: ${location.currentCrowd}
@@ -25,7 +25,7 @@ export const generateHindiAlert = async (location: LocationData): Promise<string
       Scenario: ${location.scenario}
       
       The message should be suitable for a public address system or SMS alert.
-      Include an emoji at the start.
+      ${isEmergency ? "TONE: EXTREMELY URGENT, COMMANDING. Start with 'सावधान!' (Attention!). Use short sentences." : "Include an emoji at the start."}
       Do not include English translation.
       Keep it under 30 words.
     `;

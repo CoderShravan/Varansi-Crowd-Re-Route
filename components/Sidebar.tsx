@@ -13,7 +13,8 @@ import {
   XMarkIcon,
   LightBulbIcon,
   ExclamationTriangleIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  CpuChipIcon
 } from '@heroicons/react/24/outline';
 
 interface SidebarProps {
@@ -39,12 +40,13 @@ const Sidebar: React.FC<SidebarProps> = ({ filters, setFilters, data, activeTab,
 
   const BrandLogo = () => (
     <div className="flex items-center gap-3 px-2">
-      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white shadow-lg shadow-orange-500/20 ring-1 ring-white/10">
-        <span className="text-xl">🕉️</span>
+      <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-orange-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20 ring-1 ring-white/10 group overflow-hidden relative">
+        <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+        <CpuChipIcon className="w-6 h-6 relative z-10" />
       </div>
       <div className="flex flex-col">
         <h1 className="font-bold text-white tracking-tight leading-none text-lg">Varanasi</h1>
-        <span className="text-[10px] uppercase tracking-[0.2em] text-orange-400 font-bold mt-0.5">Crowd Command</span>
+        <span className="text-[10px] uppercase tracking-[0.2em] text-indigo-400 font-bold mt-0.5">AI Command</span>
       </div>
     </div>
   );
@@ -135,7 +137,7 @@ const Sidebar: React.FC<SidebarProps> = ({ filters, setFilters, data, activeTab,
                 }}
                 className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative ${
                     activeTab === tab.id 
-                    ? 'bg-orange-600 text-white shadow-lg shadow-orange-900/20' 
+                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/20' 
                     : 'text-gray-400 hover:bg-white/5 hover:text-white'
                 }`}
                 >
@@ -154,7 +156,7 @@ const Sidebar: React.FC<SidebarProps> = ({ filters, setFilters, data, activeTab,
 
         {/* Control Panel Section */}
         <div className="p-5 bg-black/20 border-t border-gray-800 flex-shrink-0 backdrop-blur-sm">
-          <div className="flex items-center gap-2 mb-4 text-orange-400">
+          <div className="flex items-center gap-2 mb-4 text-indigo-400">
             <AdjustmentsHorizontalIcon className="w-4 h-4" />
             <span className="text-xs font-bold uppercase tracking-wider">Simulation Control</span>
           </div>
@@ -167,7 +169,7 @@ const Sidebar: React.FC<SidebarProps> = ({ filters, setFilters, data, activeTab,
                 <select
                     value={filters.scenario}
                     onChange={(e) => setFilters(prev => ({ ...prev, scenario: e.target.value as Scenario | 'All' }))}
-                    className="w-full appearance-none bg-[#1e293b] hover:bg-[#253045] text-white border border-gray-700 hover:border-gray-600 rounded-lg pl-3 pr-8 py-2.5 text-xs font-medium focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition-colors cursor-pointer"
+                    className="w-full appearance-none bg-[#1e293b] hover:bg-[#253045] text-white border border-gray-700 hover:border-gray-600 rounded-lg pl-3 pr-8 py-2.5 text-xs font-medium focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-colors cursor-pointer"
                 >
                     <option value="All">🌐 Global View</option>
                     {SCENARIOS.map(s => <option key={s} value={s}>{s === 'Normal' ? '🟢' : s === 'Emergency' ? '🔴' : '🟡'} {s}</option>)}
@@ -182,7 +184,7 @@ const Sidebar: React.FC<SidebarProps> = ({ filters, setFilters, data, activeTab,
             <div className="space-y-3">
               <div className="flex justify-between items-end">
                 <label className="text-[10px] uppercase font-bold text-gray-500">Risk Threshold</label>
-                <span className="text-xs font-mono font-bold text-orange-400 bg-orange-400/10 px-1.5 py-0.5 rounded">
+                <span className="text-xs font-mono font-bold text-indigo-400 bg-indigo-400/10 px-1.5 py-0.5 rounded">
                     {filters.riskThreshold}%
                 </span>
               </div>
@@ -192,7 +194,7 @@ const Sidebar: React.FC<SidebarProps> = ({ filters, setFilters, data, activeTab,
                 max="100"
                 value={filters.riskThreshold}
                 onChange={(e) => setFilters(prev => ({ ...prev, riskThreshold: parseInt(e.target.value) }))}
-                className="w-full h-1.5 bg-gray-700 rounded-full appearance-none cursor-pointer accent-orange-500 hover:accent-orange-400"
+                className="w-full h-1.5 bg-gray-700 rounded-full appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400"
               />
               <div className="flex justify-between text-[9px] text-gray-600 font-medium uppercase">
                   <span>Sensitive</span>
