@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import RiskMap from './components/RiskMap';
-import HitlPanel from './components/HitlPanel';
 import HindiAlerts from './components/HindiAlerts';
 import Analytics from './components/Analytics';
 import DataTable from './components/DataTable';
+import SafeRoutes from './components/SafeRoutes';
 import { generateSyntheticData } from './utils/dataGenerator';
 import { LocationData, FilterState } from './types';
 
@@ -44,8 +44,8 @@ const App: React.FC = () => {
     switch (activeTab) {
       case 'map':
         return <RiskMap data={filteredData} />;
-      case 'hitl':
-        return <HitlPanel data={filteredData} confidenceThreshold={filters.confidenceThreshold} />;
+      case 'safe-routes':
+        return <SafeRoutes data={filteredData} />;
       case 'alerts':
         return <HindiAlerts data={filteredData} />;
       case 'analytics':
@@ -72,7 +72,7 @@ const App: React.FC = () => {
             <div>
                 <h2 className="text-2xl font-bold text-gray-800">
                     {activeTab === 'map' && 'Real-time Risk Heatmap'}
-                    {activeTab === 'hitl' && 'Human-in-the-Loop Validation'}
+                    {activeTab === 'safe-routes' && 'Safe Routes & Smart Guide'}
                     {activeTab === 'alerts' && 'AI-Generated Hindi Alerts'}
                     {activeTab === 'analytics' && 'Crowd Analytics Dashboard'}
                     {activeTab === 'data' && 'Live Sensor Data'}
@@ -83,7 +83,7 @@ const App: React.FC = () => {
                 </p>
             </div>
             
-            {!process.env.API_KEY && activeTab === 'alerts' && (
+            {!process.env.API_KEY && (activeTab === 'alerts' || activeTab === 'safe-routes') && (
                 <div className="bg-red-100 text-red-700 px-4 py-2 rounded-md text-sm border border-red-200">
                     Warning: API_KEY not set for Gemini
                 </div>
