@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { LocationData } from '../types';
 import { 
@@ -10,74 +11,117 @@ interface AnalyticsProps {
 }
 
 const Analytics: React.FC<AnalyticsProps> = ({ data }) => {
-  // Sort by crowd count for the bar chart
   const sortedByCrowd = [...data].sort((a, b) => b.currentCrowd - a.currentCrowd).slice(0, 10);
   
-  // High contrast color for text labels
-  const axisStyle = { fill: '#1f2937', fontSize: 11, fontWeight: 600 };
+  // High contrast text style for axes - PURE BLACK and LARGER
+  const axisStyle = { fill: '#000000', fontSize: 12, fontWeight: 700 };
+  const labelStyle = { fill: '#000000', fontSize: 13, fontWeight: 700 };
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full overflow-y-auto pb-4">
-      {/* Top Congested Areas */}
-      <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 min-h-[300px]">
-        <h3 className="font-bold text-gray-700 mb-4">Top 10 Congested Locations</h3>
-        <ResponsiveContainer width="100%" height={250}>
-          <BarChart data={sortedByCrowd} layout="vertical">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full overflow-y-auto pb-24 lg:pb-8 custom-scrollbar p-2">
+      
+      {/* Crowd Density Bar Chart */}
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 min-h-[420px]">
+        <div className="mb-6">
+            <h3 className="font-bold text-gray-900 text-lg flex items-center gap-2">
+                <span className="w-1.5 h-6 bg-orange-600 rounded-full"></span>
+                Top Congested Locations
+            </h3>
+            <p className="text-sm text-gray-500 ml-3.5">Real-time headcount per zone</p>
+        </div>
+        <ResponsiveContainer width="100%" height={320}>
+          <BarChart data={sortedByCrowd} layout="vertical" margin={{ left: 10, right: 30, top: 10, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e5e7eb" />
-            <XAxis type="number" tick={axisStyle} stroke="#9ca3af" />
-            <YAxis dataKey="name" type="category" width={120} tick={axisStyle} stroke="#9ca3af" interval={0} />
-            <Tooltip 
-              contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-              itemStyle={{ color: '#374151' }}
+            <XAxis type="number" tick={axisStyle} stroke="#000" strokeWidth={1} />
+            <YAxis 
+                dataKey="name" 
+                type="category" 
+                width={140} 
+                tick={axisStyle} 
+                stroke="#000" 
+                strokeWidth={1}
+                interval={0} 
             />
-            <Legend wrapperStyle={{ paddingTop: '10px' }} />
-            <Bar dataKey="currentCrowd" fill="#FF6B35" radius={[0, 4, 4, 0]} name="Current Crowd" barSize={20} />
+            <Tooltip 
+              cursor={{ fill: '#f3f4f6' }}
+              contentStyle={{ borderRadius: '12px', border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', color: '#000', fontWeight: 'bold' }}
+              itemStyle={{ color: '#000' }}
+            />
+            <Bar dataKey="currentCrowd" fill="#FF6B35" radius={[0, 6, 6, 0]} barSize={22} name="People Count" />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Inflow vs Outflow */}
-      <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 min-h-[300px]">
-        <h3 className="font-bold text-gray-700 mb-4">Flow Analysis (Inflow vs Outflow)</h3>
-        <ResponsiveContainer width="100%" height={250}>
-          <AreaChart data={data.slice(0, 7)}>
+      {/* Inflow/Outflow Area Chart */}
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 min-h-[420px]">
+        <div className="mb-6">
+            <h3 className="font-bold text-gray-900 text-lg flex items-center gap-2">
+                <span className="w-1.5 h-6 bg-indigo-600 rounded-full"></span>
+                Traffic Flow Dynamics
+            </h3>
+            <p className="text-sm text-gray-500 ml-3.5">Inflow vs Outflow rate (people/min)</p>
+        </div>
+        <ResponsiveContainer width="100%" height={320}>
+          <AreaChart data={data.slice(0, 8)} margin={{ left: 0, right: 10, top: 10, bottom: 0 }}>
             <defs>
               <linearGradient id="colorIn" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.8}/>
-                <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.8}/>
+                <stop offset="95%" stopColor="#4f46e5" stopOpacity={0}/>
               </linearGradient>
               <linearGradient id="colorOut" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#059669" stopOpacity={0.8}/>
+                <stop offset="95%" stopColor="#059669" stopOpacity={0}/>
               </linearGradient>
             </defs>
-            <XAxis dataKey="name" tick={axisStyle} interval={0} angle={-25} textAnchor="end" height={60} stroke="#9ca3af" />
-            <YAxis tick={axisStyle} stroke="#9ca3af" />
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <Tooltip 
-              contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+            <XAxis 
+                dataKey="name" 
+                tick={axisStyle} 
+                interval={0} 
+                angle={-20} 
+                textAnchor="end" 
+                height={70} 
+                stroke="#000" 
             />
-            <Area type="monotone" dataKey="inflowRate" stroke="#6366f1" strokeWidth={2} fillOpacity={1} fill="url(#colorIn)" name="Inflow (p/m)" />
-            <Area type="monotone" dataKey="outflowRate" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorOut)" name="Outflow (p/m)" />
+            <YAxis tick={axisStyle} stroke="#000" width={40} />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+            <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #e5e7eb', fontWeight: 'bold' }} />
+            <Area type="monotone" dataKey="inflowRate" stroke="#4f46e5" strokeWidth={3} fillOpacity={1} fill="url(#colorIn)" name="Inflow" />
+            <Area type="monotone" dataKey="outflowRate" stroke="#059669" strokeWidth={3} fillOpacity={1} fill="url(#colorOut)" name="Outflow" />
           </AreaChart>
         </ResponsiveContainer>
       </div>
 
-       {/* Environmental Impact */}
-       <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 min-h-[300px] md:col-span-2">
-        <h3 className="font-bold text-gray-700 mb-4">Risk vs AQI Correlation</h3>
-        <ResponsiveContainer width="100%" height={250}>
-          <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+       {/* Correlation Line Chart */}
+       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 min-h-[420px] lg:col-span-2">
+        <div className="mb-6">
+            <h3 className="font-bold text-gray-900 text-lg flex items-center gap-2">
+                <span className="w-1.5 h-6 bg-rose-600 rounded-full"></span>
+                Risk vs. Environmental Factors
+            </h3>
+            <p className="text-sm text-gray-500 ml-3.5">Correlation between Crowd Risk Score and Air Quality Index (AQI)</p>
+        </div>
+        <ResponsiveContainer width="100%" height={320}>
+          <LineChart data={data} margin={{ left: 10, right: 10, top: 10, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
             <XAxis dataKey="name" hide />
-            <YAxis yAxisId="left" orientation="left" stroke="#f97316" tick={axisStyle} label={{ value: 'Risk Score', angle: -90, position: 'insideLeft', fill: '#f97316', fontSize: 12 }} />
-            <YAxis yAxisId="right" orientation="right" stroke="#10b981" tick={axisStyle} label={{ value: 'AQI', angle: 90, position: 'insideRight', fill: '#10b981', fontSize: 12 }} />
-            <Tooltip 
-              contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+            <YAxis 
+                yAxisId="left" 
+                orientation="left" 
+                stroke="#e11d48" 
+                tick={axisStyle} 
+                label={{ value: 'Risk Score', angle: -90, position: 'insideLeft', ...labelStyle, fill: '#e11d48' }} 
             />
-            <Legend wrapperStyle={{ paddingTop: '10px' }} />
-            <Line yAxisId="left" type="monotone" dataKey="riskScore" stroke="#f97316" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Risk Score" />
-            <Line yAxisId="right" type="monotone" dataKey="aqi" stroke="#10b981" strokeWidth={2} dot={{ r: 4 }} name="AQI Level" />
+            <YAxis 
+                yAxisId="right" 
+                orientation="right" 
+                stroke="#059669" 
+                tick={axisStyle} 
+                label={{ value: 'AQI Level', angle: 90, position: 'insideRight', ...labelStyle, fill: '#059669' }} 
+            />
+            <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #e5e7eb', fontWeight: 'bold' }} />
+            <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontWeight: 'bold' }} />
+            <Line yAxisId="left" type="monotone" dataKey="riskScore" stroke="#e11d48" strokeWidth={3} dot={false} activeDot={{ r: 8 }} name="Risk Score (0-100)" />
+            <Line yAxisId="right" type="monotone" dataKey="aqi" stroke="#059669" strokeWidth={3} dot={false} name="Air Quality (AQI)" />
           </LineChart>
         </ResponsiveContainer>
       </div>

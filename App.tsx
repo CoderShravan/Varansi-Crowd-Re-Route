@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import RiskMap from './components/RiskMap';
@@ -5,6 +6,7 @@ import HindiAlerts from './components/HindiAlerts';
 import Analytics from './components/Analytics';
 import DataTable from './components/DataTable';
 import SafeRoutes from './components/SafeRoutes';
+import SimulationPanel from './components/SimulationPanel';
 import { generateSyntheticData } from './utils/dataGenerator';
 import { LocationData, FilterState } from './types';
 
@@ -18,20 +20,15 @@ const App: React.FC = () => {
     confidenceThreshold: 90,
   });
 
-  // Simulate real-time data updates
   useEffect(() => {
     const initData = generateSyntheticData();
     setData(initData);
-
     const interval = setInterval(() => {
-      // Refresh data slightly to simulate real-time sensors
       setData(generateSyntheticData());
-    }, 10000); // Update every 10 seconds
-
+    }, 10000); 
     return () => clearInterval(interval);
   }, []);
 
-  // Apply Filters
   useEffect(() => {
     let result = data;
     if (filters.scenario !== 'All') {
@@ -46,6 +43,8 @@ const App: React.FC = () => {
         return <RiskMap data={filteredData} />;
       case 'safe-routes':
         return <SafeRoutes data={filteredData} />;
+      case 'simulation':
+        return <SimulationPanel />;
       case 'alerts':
         return <HindiAlerts data={filteredData} />;
       case 'analytics':
@@ -58,7 +57,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-gray-50">
+    <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-[#f8f9fa]">
       <Sidebar 
         filters={filters} 
         setFilters={setFilters} 
@@ -67,30 +66,32 @@ const App: React.FC = () => {
         setActiveTab={setActiveTab} 
       />
       
-      <main className="flex-1 p-6 h-full overflow-hidden flex flex-col">
-        <header className="mb-4 flex justify-between items-center">
+      <main className="flex-1 flex flex-col h-full overflow-hidden w-full relative">
+        <header className="px-5 py-4 md:px-8 md:py-6 flex-shrink-0 bg-white md:bg-transparent border-b md:border-none border-gray-100 flex items-center justify-between">
             <div>
-                <h2 className="text-2xl font-bold text-gray-800">
-                    {activeTab === 'map' && 'Real-time Risk Heatmap'}
-                    {activeTab === 'safe-routes' && 'Safe Routes & Smart Guide'}
-                    {activeTab === 'alerts' && 'AI-Generated Hindi Alerts'}
-                    {activeTab === 'analytics' && 'Crowd Analytics Dashboard'}
-                    {activeTab === 'data' && 'Live Sensor Data'}
+                <h2 className="text-xl md:text-3xl font-bold text-gray-800 tracking-tight">
+                    {activeTab === 'map' && 'Live Risk Heatmap'}
+                    {activeTab === 'safe-routes' && 'Safe Routes & AI Guide'}
+                    {activeTab === 'simulation' && 'AI Crowd Simulation'}
+                    {activeTab === 'alerts' && 'Hindi Public Alerts'}
+                    {activeTab === 'analytics' && 'Operational Analytics'}
+                    {activeTab === 'data' && 'Sensor Network Data'}
                 </h2>
-                <p className="text-sm text-gray-500">
-                    Monitoring {filteredData.length} active locations
-                    {filters.scenario !== 'All' && ` during ${filters.scenario} scenario`}
+                <p className="text-xs md:text-sm text-gray-500 mt-1 font-medium">
+                    Monitoring {filteredData.length} active zones • Last Sync: {new Date().toLocaleTimeString()}
                 </p>
             </div>
             
-            {!process.env.API_KEY && (activeTab === 'alerts' || activeTab === 'safe-routes') && (
-                <div className="bg-red-100 text-red-700 px-4 py-2 rounded-md text-sm border border-red-200">
-                    Warning: API_KEY not set for Gemini
-                </div>
-            )}
+            <div className="hidden md:flex items-center gap-3">
+               {!process.env.API_KEY && (
+                  <div className="bg-red-50 text-red-600 px-3 py-1 rounded-full text-xs font-bold border border-red-100">
+                      API Key Missing
+                  </div>
+               )}
+            </div>
         </header>
 
-        <div className="flex-1 min-h-0 bg-white rounded-2xl shadow-sm border border-gray-200 p-4 overflow-hidden">
+        <div className="flex-1 min-h-0 bg-white md:rounded-3xl md:shadow-[0_0_40px_-10px_rgba(0,0,0,0.05)] md:border md:border-gray-200 md:mx-6 md:mb-6 overflow-hidden relative">
             {renderContent()}
         </div>
       </main>

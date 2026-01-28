@@ -1,19 +1,18 @@
+
 import { GoogleGenAI } from "@google/genai";
 import { LocationData } from "../types";
 
 // Initialize Gemini
-// Note: In a production app, the key should come from a secure backend or environment variable.
-// For this demo, we assume process.env.API_KEY is available.
 let ai: GoogleGenAI | null = null;
 
 if (process.env.API_KEY) {
   ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 }
 
+// --- EXISTING FUNCTIONS ---
+
 export const generateHindiAlert = async (location: LocationData): Promise<string> => {
-  if (!ai) {
-    return "API Key not configured. Unable to generate alert.";
-  }
+  if (!ai) return "API Key not configured. Unable to generate alert.";
 
   try {
     const prompt = `
@@ -57,7 +56,6 @@ export const checkTrafficForLocation = async (locationName: string, userLocation
           };
       }
     
-    // Explicitly asking for traffic via Maps tool
     const prompt = `Check current real-time traffic conditions for ${locationName} in Varanasi using Google Maps. 
     Classify traffic as one of: 'High Congestion', 'Moderate Traffic', 'Light Traffic'.
     Provide a very brief 1-sentence detail (e.g., "15 min delay expected").
@@ -74,7 +72,6 @@ export const checkTrafficForLocation = async (locationName: string, userLocation
     });
 
     const text = response.text || "";
-    // Simple parsing for the specific format requested
     const parts = text.split('|');
     if (parts.length >= 2) {
         return { status: parts[0].trim(), details: parts[1].trim() };
@@ -101,20 +98,16 @@ export const getSmartGuideResponse = async (query: string, userLocation?: {lat: 
         }
 
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash", // Required for Maps grounding
+            model: "gemini-2.5-flash", 
             contents: query,
             config: {
-                // Enable BOTH Maps and Search for comprehensive answers (traffic + recommendations)
                 tools: [{ googleMaps: {} }, { googleSearch: {} }],
                 toolConfig: toolConfig,
-                // Enhanced system instruction for traffic and navigation focus
                 systemInstruction: `You are an expert local guide for Varanasi, focused on safety and enjoyment.
-                
                 YOUR RESPONSIBILITIES:
                 1. **Real-Time Traffic**: When asked about traffic, use Google Maps to find current congestion.
                 2. **Smart Routing**: Suggest routes that avoid crowds.
                 3. **Recommendations**: When asked for cafes, clubs, housing spots, or "best places", suggest specific, highly-rated locations.
-                
                 IMPORTANT FORMATTING RULES:
                 - Keep answers concise (under 150 words).
                 - **MANDATORY**: When you mention a specific place (e.g., "Blue Lassi", "Assi Ghat", "Kashi Cafe"), you MUST format it as a clickable Markdown link that opens Google Maps Search.
@@ -123,10 +116,7 @@ export const getSmartGuideResponse = async (query: string, userLocation?: {lat: 
             }
         });
 
-        // Extract text and grounding metadata (links)
         let text = response.text || "";
-        
-        // Append grounding links if available
         const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
         if (chunks) {
             text += "\n\n**Sources & Map Links:**\n";
@@ -136,7 +126,6 @@ export const getSmartGuideResponse = async (query: string, userLocation?: {lat: 
                 }
             });
         }
-        
         return text;
 
     } catch (error) {
@@ -145,7 +134,102 @@ export const getSmartGuideResponse = async (query: string, userLocation?: {lat: 
     }
 };
 
-// Audio Decoding Helpers
+// --- NEW FEATURES ---
+
+/**
+ * Transcribes audio using Gemini 3 Flash
+ */
+export const transcribeUserAudio = async (base64Audio: string): Promise<string | null> => {
+  if (!ai) return null;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: {
+        parts: [
+          { 
+            inlineData: { 
+              mimeType: 'audio/webm', // Assuming standard browser recording format
+              data: base64Audio 
+            } 
+          },
+          { text: "Transcribe the spoken audio exactly. Return only the transcription text." }
+        ]
+      }
+    });
+    return response.text || null;
+  } catch (error) {
+    console.error("Transcription Error:", error);
+    return null;
+  }
+};
+
+/**
+ * Generates a video simulation using Veo
+ */
+export const generateCrowdSimulation = async (
+  prompt: string, 
+  imageBase64: string, 
+  onProgress: (status: string) => void
+): Promise<string | null> => {
+  // Check for paid API key requirement for Veo
+  if ((window as any).aistudio) {
+    const hasKey = await (window as any).aistudio.hasSelectedApiKey();
+    if (!hasKey) {
+        await (window as any).aistudio.openSelectKey();
+        // Re-init AI with new key if needed, or rely on environment
+        // For this demo, we assume the environment/window key flow is handled
+        // Re-instantiate to be safe if the key was just selected
+        if (process.env.API_KEY) {
+           ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        }
+    }
+  }
+
+  if (!ai) return null;
+
+  try {
+    onProgress("Initializing Veo model...");
+    
+    let operation = await ai.models.generateVideos({
+      model: 'veo-3.1-fast-generate-preview',
+      prompt: `Cinematic, realistic drone view of Varanasi crowd simulation: ${prompt}`,
+      image: {
+        imageBytes: imageBase64,
+        mimeType: 'image/jpeg', 
+      },
+      config: {
+        numberOfVideos: 1,
+        resolution: '720p',
+        aspectRatio: '16:9'
+      }
+    });
+
+    onProgress("Processing video generation (this may take a minute)...");
+
+    // Polling loop
+    while (!operation.done) {
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      operation = await ai.operations.getVideosOperation({operation: operation});
+      onProgress("Rendering frames...");
+    }
+
+    if (operation.response?.generatedVideos?.[0]?.video?.uri) {
+      // Append API key to fetch valid video stream
+      const videoUri = `${operation.response.generatedVideos[0].video.uri}&key=${process.env.API_KEY}`;
+      return videoUri;
+    }
+    
+    return null;
+
+  } catch (error) {
+    console.error("Veo Generation Error:", error);
+    throw error;
+  }
+};
+
+// --- AUDIO HELPERS ---
+
 function decode(base64: string) {
   const binaryString = atob(base64);
   const len = binaryString.length;
@@ -177,7 +261,6 @@ async function decodeAudioData(
 
 export const generateSpeechFromText = async (text: string): Promise<string | null> => {
    if (!ai) return null;
-   
    try {
        const response = await ai.models.generateContent({
            model: "gemini-2.5-flash-preview-tts",

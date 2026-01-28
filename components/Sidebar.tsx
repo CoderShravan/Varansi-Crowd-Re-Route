@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { FilterState, LocationData, Scenario } from '../types';
 import { SCENARIOS } from '../constants';
 import { 
@@ -7,7 +8,10 @@ import {
   TableCellsIcon, 
   LanguageIcon, 
   ShieldCheckIcon,
-  FunnelIcon
+  FunnelIcon,
+  Bars3Icon,
+  XMarkIcon,
+  CpuChipIcon
 } from '@heroicons/react/24/outline';
 
 interface SidebarProps {
@@ -19,110 +23,150 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ filters, setFilters, data, activeTab, setActiveTab }) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const highRiskCount = data.filter(d => d.riskScore >= filters.riskThreshold).length;
 
   const tabs = [
     { id: 'map', label: 'Live Risk Map', icon: MapIcon },
-    { id: 'safe-routes', label: 'Safe Routes', icon: ShieldCheckIcon },
+    { id: 'safe-routes', label: 'Safe Routes & Chat', icon: ShieldCheckIcon },
+    { id: 'simulation', label: 'AI Simulation', icon: CpuChipIcon },
     { id: 'alerts', label: 'Hindi Alerts', icon: LanguageIcon },
     { id: 'analytics', label: 'Analytics', icon: ChartBarIcon },
     { id: 'data', label: 'Sensor Data', icon: TableCellsIcon },
   ];
 
-  return (
-    <div className="w-full md:w-64 bg-[#0b0c10] text-gray-300 flex-shrink-0 flex flex-col h-screen overflow-y-auto border-r border-gray-800 sticky top-0 z-50">
-      {/* Brand Header */}
-      <div className="p-6 pb-2">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white shadow-lg shadow-orange-500/20">
-            <span className="text-lg font-bold">🕉️</span>
-          </div>
-          <div>
-            <h1 className="font-bold text-white tracking-wide leading-none">Varanasi</h1>
-            <span className="text-[10px] uppercase tracking-widest text-orange-500 font-semibold">Crowd AI</span>
-          </div>
-        </div>
+  const BrandLogo = () => (
+    <div className="flex items-center gap-3">
+      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white shadow-lg shadow-orange-500/20">
+        <span className="text-xl">🕉️</span>
+      </div>
+      <div>
+        <h1 className="font-bold text-white tracking-wide leading-none text-lg">Varanasi</h1>
+        <span className="text-[10px] uppercase tracking-[0.2em] text-orange-500 font-bold">Crowd AI</span>
+      </div>
+    </div>
+  );
 
-        {/* Live Status Widget */}
-        <div className="bg-gray-900/50 rounded-xl p-4 border border-gray-800 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-16 h-16 bg-red-500/10 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
-          <div className="relative z-10 flex justify-between items-end">
-            <div>
-              <p className="text-xs font-medium text-gray-400 mb-1">High Risk Zones</p>
-              <p className={`text-2xl font-bold ${highRiskCount > 0 ? 'text-red-500' : 'text-emerald-500'}`}>
-                {highRiskCount} <span className="text-sm font-normal text-gray-500">/ {data.length}</span>
-              </p>
-            </div>
-            <div className={`w-2 h-2 rounded-full mb-2 ${highRiskCount > 0 ? 'bg-red-500 animate-ping' : 'bg-emerald-500'}`}></div>
-          </div>
-        </div>
+  return (
+    <>
+      {/* Mobile Top Bar */}
+      <div className="md:hidden bg-[#0b0c10] p-4 flex items-center justify-between border-b border-gray-800 z-40 sticky top-0 flex-shrink-0">
+        <BrandLogo />
+        <button 
+          onClick={() => setIsMobileMenuOpen(true)}
+          className="p-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+        >
+          <Bars3Icon className="w-6 h-6" />
+        </button>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 px-3 py-6 space-y-1">
-        <p className="px-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Main Menu</p>
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${
-              activeTab === tab.id 
-                ? 'bg-orange-500/10 text-orange-400 border-l-2 border-orange-500 pl-[10px]' 
-                : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200 border-l-2 border-transparent'
-            }`}
-          >
-            <tab.icon className={`w-5 h-5 transition-colors ${activeTab === tab.id ? 'text-orange-400' : 'text-gray-500 group-hover:text-gray-300'}`} />
-            <span>{tab.label}</span>
-          </button>
-        ))}
-      </nav>
+      {/* Backdrop for Mobile */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden animate-fadeIn"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
 
-      {/* Controls Footer */}
-      <div className="p-5 bg-[#0f1014] border-t border-gray-800">
-        <div className="flex items-center gap-2 mb-4 text-gray-400">
-          <FunnelIcon className="w-4 h-4" />
-          <span className="text-xs font-bold uppercase tracking-wider">Configuration</span>
-        </div>
+      {/* Sidebar Drawer */}
+      <div className={`
+        fixed inset-y-0 left-0 z-50 w-72 bg-[#0b0c10] text-gray-300 flex flex-col h-full border-r border-gray-800 shadow-2xl transform transition-transform duration-300 ease-out
+        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+        md:translate-x-0 md:static md:w-64 md:h-screen md:shadow-none
+      `}>
         
-        <div className="space-y-5">
-          <div>
-            <label className="text-xs text-gray-500 mb-1.5 block font-medium">Simulation Scenario</label>
-            <div className="relative">
+        <div className="p-6 pb-2">
+          <div className="flex items-center justify-between mb-8">
+            <div className="hidden md:block">
+              <BrandLogo />
+            </div>
+            <div className="md:hidden w-full flex justify-between items-center">
+               <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Menu</span>
+               <button 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="p-1 text-gray-400 hover:text-white bg-gray-900 rounded-md"
+               >
+                 <XMarkIcon className="w-6 h-6" />
+               </button>
+            </div>
+          </div>
+
+          <div className="bg-gray-900/50 rounded-xl p-4 border border-gray-800 relative overflow-hidden group mb-2">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-red-500/10 rounded-bl-full -mr-6 -mt-6 transition-transform group-hover:scale-110"></div>
+            <div className="relative z-10 flex justify-between items-end">
+              <div>
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">High Risk Zones</p>
+                <p className={`text-3xl font-bold ${highRiskCount > 0 ? 'text-red-500' : 'text-emerald-500'}`}>
+                  {highRiskCount} <span className="text-sm font-medium text-gray-600">/ {data.length}</span>
+                </p>
+              </div>
+              <div className={`w-2.5 h-2.5 rounded-full mb-1.5 ${highRiskCount > 0 ? 'bg-red-500 animate-ping' : 'bg-emerald-500'}`}></div>
+            </div>
+          </div>
+        </div>
+
+        <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto custom-scrollbar">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => {
+                setActiveTab(tab.id);
+                setIsMobileMenuOpen(false);
+              }}
+              className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden ${
+                activeTab === tab.id 
+                  ? 'bg-gradient-to-r from-orange-500/10 to-transparent text-orange-400 border border-orange-500/20' 
+                  : 'text-gray-400 hover:bg-gray-800/50 hover:text-gray-200 border border-transparent'
+              }`}
+            >
+              <tab.icon className={`w-5 h-5 transition-colors ${activeTab === tab.id ? 'text-orange-400' : 'text-gray-500 group-hover:text-gray-300'}`} />
+              <span>{tab.label}</span>
+              {activeTab === tab.id && <div className="absolute left-0 top-0 bottom-0 w-1 bg-orange-500"></div>}
+            </button>
+          ))}
+        </nav>
+
+        <div className="p-5 bg-[#0e0f13] border-t border-gray-800 flex-shrink-0">
+          <div className="flex items-center gap-2 mb-4 text-gray-400">
+            <FunnelIcon className="w-4 h-4" />
+            <span className="text-xs font-bold uppercase tracking-wider">Configuration</span>
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="text-[10px] uppercase font-bold text-gray-600 mb-1.5 block">Scenario Mode</label>
               <select
                 value={filters.scenario}
                 onChange={(e) => setFilters(prev => ({ ...prev, scenario: e.target.value as Scenario | 'All' }))}
-                className="w-full bg-gray-800/50 text-gray-200 border border-gray-700 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/20 appearance-none cursor-pointer hover:bg-gray-800 transition-colors"
+                className="w-full bg-gray-800 text-gray-200 border border-gray-700 rounded-lg px-3 py-2 text-xs focus:border-orange-500 outline-none"
               >
-                <option value="All">All Scenarios</option>
+                <option value="All">Global View</option>
                 {SCENARIOS.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-              </div>
             </div>
-          </div>
 
-          <div>
-            <div className="flex justify-between items-center mb-1.5">
-              <label className="text-xs text-gray-500 font-medium">Risk Threshold</label>
-              <span className="text-xs font-mono text-orange-400 bg-orange-400/10 px-1.5 rounded">{filters.riskThreshold}%</span>
+            <div>
+              <div className="flex justify-between items-center mb-1.5">
+                <label className="text-[10px] uppercase font-bold text-gray-600">Risk Threshold</label>
+                <span className="text-xs font-mono text-orange-400">{filters.riskThreshold}%</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={filters.riskThreshold}
+                onChange={(e) => setFilters(prev => ({ ...prev, riskThreshold: parseInt(e.target.value) }))}
+                className="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-orange-500"
+              />
             </div>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={filters.riskThreshold}
-              onChange={(e) => setFilters(prev => ({ ...prev, riskThreshold: parseInt(e.target.value) }))}
-              className="w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-orange-500 hover:accent-orange-400"
-            />
           </div>
-        </div>
-        
-        <div className="mt-6 pt-4 border-t border-gray-800 text-[10px] text-gray-600 text-center">
-           System Status: <span className="text-emerald-500">Online</span> • v1.2
+          
+          <div className="mt-6 flex items-center justify-center gap-2 text-[10px] text-gray-600">
+             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> System Online
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
