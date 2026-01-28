@@ -1,0 +1,7 @@
+{
+  "name": "varanasi Crowd CMS",
+  "description": "AI-powered crowd flow prediction and management system for Varanasi, integrating real-time risk assessment and Hindi alerts.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
